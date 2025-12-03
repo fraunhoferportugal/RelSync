@@ -726,7 +726,6 @@ def main():
                 print("No input provided.", file=sys.stderr)
                 sys.exit(1)
 
-            print(raw)
             try:
                 data = json.loads(raw)
             except json.JSONDecodeError as e:

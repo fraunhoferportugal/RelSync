@@ -9,10 +9,16 @@ import sys
 # -------------------------
 # Utilities
 # -------------------------
-def run(cmd, cwd=None, capture_output=False):
+def run(cmd, cwd=None, capture_output=False, silent=False):
     """Run a shell command."""
     result = subprocess.run(
-        cmd, cwd=cwd, shell=True, capture_output=capture_output, text=True
+        cmd,
+        cwd=cwd,
+        shell=True,
+        capture_output=capture_output,
+        text=True,
+        stdout=subprocess.DEVNULL if silent else None,
+        stderr=subprocess.DEVNULL if silent else None
     )
     if capture_output:
         return result.stdout.strip()
@@ -355,14 +361,17 @@ def get_current_status_from_parent_chart(chart_path_overrides=None):
 def safe(v):
     return v if v is not None else "-"
 
-def print_updates(updates, parent_info, output="cli"):
+def print_updates(updates, parent_info, output="cli", changes=None):
     """
-    output: "cli", "json", "ci"
+    output: "cli", "json", "ci", None
     """
-  
+    if output == None:
+        return
 
     if output == "json":
         data = {"parent": parent_info, "submodules": updates}
+        if changes is not None:
+            data["commited_changes"] = changes
         print(json.dumps(data, indent=2))
         return
 
@@ -386,6 +395,11 @@ def print_updates(updates, parent_info, output="cli"):
         lines.append(
             f"**Parent chart:** {parent_info['current']} → {parent_info['suggested']} (chart bump: {parent_info['chart_bump'] or '-'})"
         )
+        if changes is not None:
+            if changes is True:
+                lines.append(f"**Commited changes to this branch**")
+            else:
+                lines.append(f"**No changes in this branch**")
         print("\n".join(lines))
         return
 
@@ -404,6 +418,12 @@ def print_updates(updates, parent_info, output="cli"):
     print(
         f"Parent chart: {parent_info['current']} → {parent_info['suggested']} (chart bump: {parent_info['chart_bump'] or '-'})"
     )
+    if changes is None:
+        return
+    if changes is True:
+        print("Commited changes to this branch")
+    else:
+        print("No changes in this branch")
 
 
 # -------------------------
@@ -492,8 +512,8 @@ def parse_tag_overrides(tag_overrides_file_path, tag_overrides_arg):
 def apply_distribution_updates(updates, parent_info, chart_path_overrides, quiet=False):
     repo_chart = chart_path_overrides.get("repo_chart", default_chart_location)
     if not os.path.isfile(repo_chart):
-        print(f"Repo chart not found: {repo_chart}")
-        return
+        print(f"Repo chart not found: {repo_chart}", file=sys.stderr)
+        sys.exit(1)
 
     subprocess.run(f"cp {repo_chart} {repo_chart}.bak", shell=True)
     chart_data = load_yaml(repo_chart) 
@@ -530,9 +550,11 @@ def commit_changes(message):
     """Commit all changes to git with the given message."""
     try:
         run("git add -A")
-        run(f'git commit -m "{message}"')
+        run(f'git commit -m "{message}"', silent=True)
     except subprocess.CalledProcessError:
-        print("Nothing to commit.")
+        return False
+
+    return True
 
 def save_state(updates, parent_info, path):
     """Save updates and parent info to JSON."""
@@ -633,6 +655,17 @@ def main():
         parents=[chart_args, output_args, commit_args],
     )
 
+    format_parser = subparsers.add_parser(
+        "format",
+        help="Render JSON file or string in the desired format",
+        parents=[output_args],
+    )
+    format_parser.add_argument(
+        "-f",
+        "--file",
+        help="Use file contents instead of STDIN",
+    )
+
     parser_submodule = subparsers.add_parser(
         "submodule",
         help="Update submodules and commit",
@@ -682,6 +715,26 @@ def main():
             pass
 
     match (args.command):
+        case "format":
+            if args.file:
+                with open(args.file, "r") as f:
+                    raw = f.read()
+            else:
+                raw = sys.stdin.read()
+
+            if not raw.strip():
+                print("No input provided.", file=sys.stderr)
+                sys.exit(1)
+
+            print(raw)
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError as e:
+                print(f"Invalid JSON: {e}", file=sys.stderr)
+                sys.exit(1)
+
+            print_updates(data.get("submodules"), data.get("parent"), args.output, data.get("commited_changes"))
+        
         case "fetch":
             updates, parent_info = fetch_updates(
                 submodule_tag_overrides, chart_path_overrides
@@ -703,11 +756,13 @@ def main():
 
             apply_submodule_updates(updates, True, True)
             apply_distribution_updates(updates, parent_info, chart_path_overrides, True)
-            updates, parent_info = fetch_updates(submodule_tag_overrides, chart_path_overrides)
+            new_updates, new_parent_info = fetch_updates(submodule_tag_overrides, chart_path_overrides)
             if args.use_state_file:
-                save_state(updates, parent_info, args.state_file)
+                save_state(new_updates, new_parent_info, args.state_file)
+            changed = None
             if (args.commit):
-                commit_changes("Update submodules and chart versions")
+                changed = commit_changes("Update submodules and chart versions")
+            print_updates(updates, parent_info, args.output, changed)
 
         case "submodule":
             match (args.submodule_command):
@@ -720,7 +775,7 @@ def main():
                         commit_changes("Update submodules")
                 case _:
                     print("Unknown or missing command")
-                    update_parser.print_help()
+                    parser_submodule.print_help()
 
         case "distribution":
             match (args.distribution_command):

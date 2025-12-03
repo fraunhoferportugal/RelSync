@@ -1,0 +1,17 @@
+[project]
+name = "relsync"
+version = "0.1.0"
+description = "RelSync is a command-line tool for preparing and managing releases across repositories that use Git submodules. It automates updating submodules, Helm charts, and distribution manifests, ensuring release artifacts are consistent and up to date."
+authors = [
+    { name="José Costa", email="jose.costa@fraunhofer.pt" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "AGPLV3" }
+
+dependencies = [
+    "PyYAML>=6.0.3"
+]
+
+[project.scripts]
+relsync = "relsync.cli:main"

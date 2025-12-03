@@ -174,7 +174,7 @@ def bump_version(version, bump):
 
 bump_priority = {"patch": 1, "minor": 2, "major": 3}
 
-default_chart_location = "dist/chart/Chart.yaml"
+default_chart_location = "deploy/chart/Chart.yaml"
 
 
 def fetch_updates(submodule_tag_overrides, chart_path_overrides):

@@ -72,7 +72,7 @@ try:
             return {}
     def dump_yaml(data, path):
         with open(path, "w") as f:
-            yaml.safe_dump(data, f)
+            yaml.safe_dump(data, f, sort_keys=False)
 
     def load_yaml_string(yaml_str):
         try:

@@ -633,11 +633,18 @@ def main():
         parents=[chart_args, output_args, commit_args],
     )
 
-    parser_submodule = subparsers.add_parser("submodule")
+    parser_submodule = subparsers.add_parser(
+        "submodule",
+        help="Update submodules and commit",
+    )
     parser_submodule_subparsers = parser_submodule.add_subparsers(
         dest="submodule_command"
     )
-    submodule_update_parser = parser_submodule_subparsers.add_parser("update", parents=[commit_args])
+    submodule_update_parser = parser_submodule_subparsers.add_parser(
+        "update",
+        parents=[commit_args],
+        help="Update submodules and commit"
+    )
     submodule_update_parser.add_argument(
         "-a",
         "--accept",
@@ -645,9 +652,12 @@ def main():
         help="Accept all suggested tags. Either the tag defined in the mappings or the latest tag.",
     )
 
-    parser_distribution = subparsers.add_parser("distribution")
+    parser_distribution = subparsers.add_parser(
+        "distribution",
+        help="Update chart versions and commit",
+    )
     parser_distribution_subparsers = parser_distribution.add_subparsers(
-        dest="distribution_command"
+        dest="distribution_command",
     )
     distribution_update_parser = parser_distribution_subparsers.add_parser(
         "update", help="Update distribution versions", parents=[chart_args, commit_args]

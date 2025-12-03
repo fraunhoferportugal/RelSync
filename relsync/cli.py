@@ -509,13 +509,14 @@ def parse_tag_overrides(tag_overrides_file_path, tag_overrides_arg):
 # -------------------------
 # Update distribution (Chart.yaml)
 # -------------------------
-def apply_distribution_updates(updates, parent_info, chart_path_overrides, quiet=False):
+def apply_distribution_updates(updates, parent_info, chart_path_overrides, quiet=False, no_backup=False):
     repo_chart = chart_path_overrides.get("repo_chart", default_chart_location)
     if not os.path.isfile(repo_chart):
         print(f"Repo chart not found: {repo_chart}", file=sys.stderr)
         sys.exit(1)
 
-    subprocess.run(f"cp {repo_chart} {repo_chart}.bak", shell=True)
+    if not no_backup:
+        subprocess.run(f"cp {repo_chart} {repo_chart}.bak", shell=True)
     chart_data = load_yaml(repo_chart) 
 
     for info in updates.values():
@@ -611,6 +612,13 @@ def main():
         action="store_true",
         help="Force refetching submodule updates instead of loading from state file",
         default=False,
+    )
+
+    chart_args.add_argument(
+        "--no-backup",
+        action="store_true",
+        default=False,
+        help="Do not create Chart.yaml backup"
     )
 
 
@@ -754,7 +762,7 @@ def main():
                     save_state(updates, parent_info, args.state_file)
 
             apply_submodule_updates(updates, True, True)
-            apply_distribution_updates(updates, parent_info, chart_path_overrides, True)
+            apply_distribution_updates(updates, parent_info, chart_path_overrides, True, args.no_backup)
             new_updates, new_parent_info = fetch_updates(submodule_tag_overrides, chart_path_overrides)
             if args.use_state_file:
                 save_state(new_updates, new_parent_info, args.state_file)

@@ -3,6 +3,8 @@ name: Bump, tag and release on main branch
 on:
   pull_request:
     types: [closed]
+    branches:
+      - main
 
 permissions:
   contents: write

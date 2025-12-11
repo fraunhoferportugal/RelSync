@@ -60,7 +60,7 @@ jobs:
           bump="patch"
 
           while IFS= read -r comment; do
-            if [[ "$comment" =~ @bot[[:space:]]+bump[[:space:]]+(major|minor|patch) ]]; then
+            if [[ "$comment" =~ !relsync[[:space:]]+bump[[:space:]]+(major|minor|patch) ]]; then
               bump="${BASH_REMATCH[1]}"
               break
             fi

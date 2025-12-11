@@ -94,3 +94,4 @@ jobs:
           generate_release_notes: true
           draft: true
           tag_name: ${{ needs.create-tag.outputs.new_tag }}
+          name: RelSync ${{ needs.create-tag.outputs.new_tag }}

@@ -37,13 +37,13 @@ jobs:
     if: needs.check-skip.outputs.skip-tag == 'false'
     runs-on: ubuntu-latest
     steps:
-      - name: Install RelSync
-        run: pip install git+https://github.com/fraunhoferportugal/RelSync.git@main
-
       - name: Checkout repo
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Install RelSync
+        run: pip install .
 
       - name: Set up Git
         run: |

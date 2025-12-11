@@ -36,6 +36,8 @@ jobs:
     needs: check-skip
     if: needs.check-skip.outputs.skip-tag == 'false'
     runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag.outputs.new_tag }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
@@ -91,3 +93,4 @@ jobs:
         with:
           generate_release_notes: true
           draft: true
+          tag_name: ${{ needs.create-tag.outputs.new_tag }}

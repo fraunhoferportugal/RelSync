@@ -74,7 +74,7 @@ jobs:
         id: tag
         run: |
           output=$(relsync bump ${{ steps.bump.outputs.bump_type }} --no-chart --create-tag -o json)
-          new_tag=$(echo $output | jq '.newTag')
+          new_tag=$(echo $output | jq '.newTag' -r)
           echo "new_tag=$new_tag"
           echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
         

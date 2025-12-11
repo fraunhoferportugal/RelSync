@@ -441,6 +441,7 @@ def main():
                     args.chart_bump_type, app_version, args.commit, chart_path_overrides
                 )
 
+            new_tag = None
             if args.commit and args.create_tag:
                 if not args.no_chart:
                     if args.skip_repo_bump:
@@ -450,7 +451,8 @@ def main():
                             else "Update chart version"
                         )
                         commit_changes(message)
-                        run(f"git tag {app_version}+chart{chart_version}")
+                        new_tag = f"{app_version}+chart{chart_version}"
+                        run(f"git tag {new_tag}")
                     else:
                         message = (
                             args.commit_message
@@ -458,26 +460,30 @@ def main():
                             else "Update app and chart versions"
                         )
                         commit_changes(message)
-                        run(f"git tag {app_version}")
+                        new_tag = app_version
+                        run(f"git tag {new_tag}")
             if args.no_chart:
                 message = (
                     args.commit_message
                     if args.commit_message
                     else "Update app versions"
                 )
-                run(f"git tag {app_version}")
+                new_tag = app_version
+                run(f"git tag {new_tag}")
 
             match (args.output):
                 case "json":
                     output = {
-                        "app_version": app_version,
-                        "chart_version": chart_version,
+                        "appVersion": app_version,
+                        "chartVersion": chart_version,
+                        "newTag": new_tag,
                     }
                     print(json.dumps(output))
 
                 case "cli" | "comment" | _:
                     print(f"Repo version: {app_version}")
                     print(f"Chart Version: {safe(chart_version)}")
+                    print(f"New tag: {safe(new_tag)}")
 
         case _:
             print("Unknown or missing command")

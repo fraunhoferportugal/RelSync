@@ -65,6 +65,8 @@ jobs:
           done <<< "$comments"
 
           echo "bump_type=$bump" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Update and tag
         id: tag

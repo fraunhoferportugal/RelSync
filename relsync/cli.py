@@ -431,7 +431,7 @@ def main():
                 )
 
             latest_tag = get_latest_tag()
-            app_version = parse_version(latest_tag)
+            app_version = get_version_string(latest_tag)
             if not args.skip_repo_bump:
                 app_version = bump_version(latest_tag, args.bump_type)
 

@@ -321,7 +321,7 @@ def main():
     )
     chart_path_overrides = {}
     match (args.command):
-        case "fetch", "update", "distribution", "bump":
+        case "fetch" | "update" | "distribution" | "bump":
             chart_path_overrides.update(
                 parse_chart_path_overrides(
                     args.chart_path_overrides,

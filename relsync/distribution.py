@@ -4,7 +4,8 @@ from .utils import *
 
 default_chart_dir = "deploy/chart"
 default_chart_location = f"{default_chart_dir}/Chart.yaml"
-default_values_location  = f"{default_chart_dir}/values.yaml"
+default_values_location = f"{default_chart_dir}/values.yaml"
+
 
 def apply_distribution_updates(
     updates, parent_info, chart_path_overrides, quiet=False, no_backup=False
@@ -39,9 +40,9 @@ def parse_chart_path_overrides(
     chart_path_overrides, submodule_chart_paths_arg, repo_chart_path_arg
 ):
     file_overrides = parse_json_file(chart_path_overrides)
-    submodule_chart_path_overrides = file_overrides.get(
-        "submoduleCharts"
-    ) | parse_json_arg(submodule_chart_paths_arg)
+    submodule_chart_path_overrides = parse_json_arg(
+        submodule_chart_paths_arg
+    ) or file_overrides.get("submoduleCharts")
 
     repo_chart_path_override = (
         repo_chart_path_arg if repo_chart_path_arg else file_overrides.get("repoChart")

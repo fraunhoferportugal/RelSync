@@ -22,6 +22,10 @@ def parse_version(version):
     patch = int(match.group("patch"))
     return (major, minor, patch)
 
+def get_version_string(version):
+    version_parts=parse_version(version)
+    return '.'.join(str(part) for part in version_parts)
+
 
 def version_bump(old, new):
     """Return bump type: 'patch', 'minor', 'major', or None."""

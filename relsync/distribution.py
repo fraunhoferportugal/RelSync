@@ -2,8 +2,9 @@ import os
 
 from .utils import *
 
-default_chart_location = "deploy/chart/Chart.yaml"
-
+default_chart_dir = "deploy/chart"
+default_chart_location = f"{default_chart_dir}/Chart.yaml"
+default_values_location  = f"{default_chart_dir}/values.yaml"
 
 def apply_distribution_updates(
     updates, parent_info, chart_path_overrides, quiet=False, no_backup=False

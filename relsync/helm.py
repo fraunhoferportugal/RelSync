@@ -1,6 +1,6 @@
 import os
 
-from .distribution import default_chart_location
+from .distribution import default_chart_location, default_values_location
 from .git import get_submodules
 from .semver import *
 from .utils import *
@@ -130,6 +130,14 @@ def bump_chart_version(bump_type, app_version, update_chart, chart_path_override
     chart_version = chart["version"]
     new_chart_version = bump_version(chart_version, bump_type)
     if update_chart:
+        values_file = f"{os.path.dirname(chart_file)}/values.yaml"
+        if not os.path.exists(values_file):
+            print(f"Values file not found: {values_file}", file=sys.stderr)
+            sys.exit(1)
+        values = load_yaml(values_file)
+        values["image"]["tag"] = app_version
+        dump_yaml(values, values_file)
+
         chart["version"] = new_chart_version
         chart["appVersion"] = app_version
         dump_yaml(chart, chart_file)

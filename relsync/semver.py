@@ -1,3 +1,5 @@
+from enum import Enum
+from typing import Optional, Union, Tuple
 import re
 
 bump_priority = {"patch": 1, "minor": 2, "major": 3}
@@ -11,16 +13,39 @@ semver_regex = re.compile(
     r"(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 )
 
+class VersionGroup(Enum):
+    MAJOR = "major"
+    MINOR = "minor"
+    PATCH = "patch"
+    PRERELEASE = "prerelease"
+    BUILDMETADATA = "buildmetadata"
 
-def parse_version(version):
-    """Split semver into (major, minor, patch)."""
-    match = semver_regex.match(version)
-    if not match:
+# Return type can be int, str, or tuple[int, int, int]
+def parse_version(version: str, group: Optional[VersionGroup] = None) -> Optional[Union[int, str, Tuple[int, int, int]]]:
+    """Split SemVer into components. Optionally return only a specific group."""
+    match_obj = semver_regex.match(version)
+    if not match_obj:
         raise ValueError(f"Invalid SemVer: {version}")
-    major = int(match.group("major"))
-    minor = int(match.group("minor"))
-    patch = int(match.group("patch"))
-    return (major, minor, patch)
+
+    major = int(match_obj.group("major"))
+    minor = int(match_obj.group("minor"))
+    patch = int(match_obj.group("patch"))
+    prerelease = match_obj.group("prerelease")
+    buildmetadata = match_obj.group("buildmetadata")
+
+    match group:
+        case VersionGroup.MAJOR:
+            return major
+        case VersionGroup.MINOR:
+            return minor
+        case VersionGroup.PATCH:
+            return patch
+        case VersionGroup.PRERELEASE:
+            return prerelease
+        case VersionGroup.BUILDMETADATA:
+            return buildmetadata
+        case None:
+            return (major, minor, patch)
 
 def get_version_string(version):
     version_parts=parse_version(version)

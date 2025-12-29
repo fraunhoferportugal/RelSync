@@ -42,7 +42,7 @@ def parse_chart_path_overrides(
     file_overrides = parse_json_file(chart_path_overrides)
     submodule_chart_path_overrides = parse_json_arg(
         submodule_chart_paths_arg
-    ) or file_overrides.get("submoduleCharts")
+    ) or file_overrides.get("submoduleCharts", {})
 
     repo_chart_path_override = (
         repo_chart_path_arg if repo_chart_path_arg else file_overrides.get("repoChart")

@@ -133,7 +133,7 @@ def print_updates(updates, parent_info, output="cli", changes=None):
     if output == "json":
         data = {"parent": parent_info, "submodules": updates}
         if changes is not None:
-            data["commited_changes"] = changes
+            data["committed_changes"] = changes
         print(json.dumps(data, indent=2))
         return
 
@@ -159,7 +159,7 @@ def print_updates(updates, parent_info, output="cli", changes=None):
         )
         if changes is not None:
             if changes is True:
-                lines.append(f"**Commited changes to this branch**")
+                lines.append(f"**Committed changes to this branch**")
             else:
                 lines.append(f"**No changes in this branch**")
         print("\n".join(lines))
@@ -183,7 +183,7 @@ def print_updates(updates, parent_info, output="cli", changes=None):
     if changes is None:
         return
     if changes is True:
-        print("Commited changes to this branch")
+        print("Committed changes to this branch")
     else:
         print("No changes in this branch")
 
@@ -384,7 +384,7 @@ def main():
                 data.get("submodules"),
                 data.get("parent"),
                 args.output,
-                data.get("commited_changes"),
+                data.get("committed_changes"),
             )
 
         case "fetch":

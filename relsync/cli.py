@@ -13,7 +13,11 @@ from .submodules import *
 from .utils import *
 
 
-def fetch_updates(submodule_tag_overrides, chart_path_overrides, prerelease_identifier=None):
+def fetch_updates(
+    submodule_tag_overrides,
+    chart_path_overrides,
+    prerelease_identifier=None,
+):
     submodules = get_submodules()
     updates = {}
     global_bump_level = 0
@@ -85,21 +89,30 @@ def fetch_updates(submodule_tag_overrides, chart_path_overrides, prerelease_iden
             break
 
     repo_chart = chart_path_overrides.get("repo_chart", default_chart_location)
-    repo_current = get_chart_version(repo_chart)
-    current_version_parts = parse_version(repo_current)
-    repo_bump = "minor" if bump_type and bump_priority[bump_type] > 2 else "patch" if bump_type else None
-    repo_suggested = (
-        bump_version(repo_current, repo_bump) if repo_bump else ".".join(str(x) for x in current_version_parts)
+    (repo_current, repo_base) = get_chart_version(repo_chart, True)
+    repo_bump = (
+        "minor"
+        if bump_type and bump_priority[bump_type] > 2
+        else "patch" if bump_type else None
     )
-    
+    repo_suggested = (
+        bump_version(repo_base, repo_bump)
+        if repo_bump
+        else ".".join(str(x) for x in parse_version(repo_base))
+    )
+
     if prerelease_identifier is not None:
         prerelease = parse_version(repo_current, VersionGroup.PRERELEASE)
-        if prerelease and prerelease_identifier in prerelease:
+        if parse_version(repo_suggested) > parse_version(repo_current):
+            repo_suggested = f"{repo_suggested}-{prerelease_identifier}"
+        elif prerelease and prerelease_identifier in prerelease:
             prerelease_number = 0
             parts = prerelease.split(".")
             if len(parts) > 1 and parts[-1].isdigit():
                 prerelease_number = int(parts[-1])
-            repo_suggested = f"{repo_suggested}-{prerelease_identifier}.{prerelease_number+1}"
+            repo_suggested = (
+                f"{".".join(str(x) for x in parse_version(repo_current))}-{prerelease_identifier}.{prerelease_number+1}"
+            )
         else:
             repo_suggested = f"{repo_suggested}-{prerelease_identifier}"
 
@@ -258,7 +271,7 @@ def main():
     update_parser.add_argument(
         "--prerelease-identifier",
         help="Add a prerelease identifier to the helm chart version. Follows the format <next-version>-<identifier>(.nr-of-the-update)",
-        default=None
+        default=None,
     )
 
     format_parser = subparsers.add_parser(
@@ -395,14 +408,21 @@ def main():
                     sys.exit(1)
             else:
                 updates, parent_info = fetch_updates(
-                    submodule_tag_overrides, chart_path_overrides, args.prerelease_identifier
+                    submodule_tag_overrides,
+                    chart_path_overrides,
+                    prerelease_identifier=args.prerelease_identifier,
                 )
                 if args.use_state_file:
                     save_state(updates, parent_info, args.state_file)
 
             apply_submodule_updates(updates, True, True)
             apply_distribution_updates(
-                updates, parent_info, chart_path_overrides, True, args.no_backup
+                updates,
+                parent_info,
+                chart_path_overrides,
+                True,
+                args.no_backup,
+                prerelease_identifier=args.prerelease_identifier,
             )
             new_updates, new_parent_info = fetch_updates(
                 submodule_tag_overrides, chart_path_overrides

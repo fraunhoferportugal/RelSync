@@ -141,7 +141,8 @@ def bump_chart_version(bump_type, app_version, update_chart, chart_path_override
         values_file = f"{os.path.dirname(chart_file)}/values.yaml"
         if os.path.exists(values_file):
             values = load_yaml(values_file)
-            values["image"]["tag"] = app_version
+            if values.get("image", {}).get("tag"):
+                values["image"]["tag"] = app_version
             dump_yaml(values, values_file)
         else:
             print(f"Values file not found: {values_file}", file=sys.stderr)

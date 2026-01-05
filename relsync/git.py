@@ -21,7 +21,7 @@ def get_submodules():
 
 def fetch_tags(path):
     run("git fetch --tags --quiet", cwd=path)
-    tags = run("git tag --sort=-v:refname", cwd=path, capture_output=True).splitlines()
+    tags = run("git tag | sort -Vr", cwd=path, capture_output=True).splitlines()
     current = run(
         "git describe --tags --exact-match 2>/dev/null || echo 'none'",
         cwd=path,
@@ -32,7 +32,7 @@ def fetch_tags(path):
 
 
 def get_latest_tag():
-    tag = run("git tag --sort=-v:refname | head -n 1 || echo ''", capture_output=True)
+    tag = run("git tag | sort -Vr | head -n 1 || echo ''", capture_output=True)
     return tag.strip() or "0.0.0"
 
 

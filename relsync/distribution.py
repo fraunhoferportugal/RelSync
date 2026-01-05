@@ -1,6 +1,7 @@
 import os
 
 from .utils import *
+from .semver import bump_priority
 
 default_chart_dir = "deploy/chart"
 default_chart_location = f"{default_chart_dir}/Chart.yaml"
@@ -41,7 +42,16 @@ def apply_distribution_updates(
         annotations = chart_data.get("annotations", {})
         if prerelease_identifier not in parent_info["current"]:
             annotations["relsync/base-version"] = parent_info["current"]
-        annotations["relsync/bump"] = parent_info["chart_bump"]
+
+        if bump_priority.get(parent_info["chart_bump"], -1) >= bump_priority.get(
+            annotations.get("relsync/bump"), 0
+        ):
+            annotations["relsync/bump"] = parent_info["chart_bump"]
+        elif annotations.get("relsync/bump"):
+            annotations["relsync/bump"] = annotations.get("relsync/bump")
+        else:
+            annotations["relsync/bump"] = "release"
+
         chart_data["annotations"] = annotations
 
     dump_yaml(chart_data, repo_chart)

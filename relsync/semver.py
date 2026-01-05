@@ -13,6 +13,7 @@ semver_regex = re.compile(
     r"(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 )
 
+
 class VersionGroup(Enum):
     MAJOR = "major"
     MINOR = "minor"
@@ -20,8 +21,11 @@ class VersionGroup(Enum):
     PRERELEASE = "prerelease"
     BUILDMETADATA = "buildmetadata"
 
+
 # Return type can be int, str, or tuple[int, int, int]
-def parse_version(version: str, group: Optional[VersionGroup] = None) -> Optional[Union[int, str, Tuple[int, int, int]]]:
+def parse_version(
+    version: str, group: Optional[VersionGroup] = None
+) -> Optional[Union[int, str, Tuple[int, int, int]]]:
     """Split SemVer into components. Optionally return only a specific group."""
     match_obj = semver_regex.match(version)
     if not match_obj:
@@ -47,9 +51,10 @@ def parse_version(version: str, group: Optional[VersionGroup] = None) -> Optiona
         case None:
             return (major, minor, patch)
 
+
 def get_version_string(version):
-    version_parts=parse_version(version)
-    return '.'.join(str(part) for part in version_parts)
+    version_parts = parse_version(version)
+    return ".".join(str(part) for part in version_parts)
 
 
 def version_bump(old, new):

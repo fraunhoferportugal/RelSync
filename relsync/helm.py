@@ -11,7 +11,14 @@ def get_chart_version(chart_path, with_base_version=False):
         return None
     chart = load_yaml(chart_path)
     version = chart.get("version")
-    return version if not with_base_version else (version, chart.get("annotations", {}).get("relsync/base-version", version))
+    return (
+        version
+        if not with_base_version
+        else (
+            version,
+            chart.get("annotations", {}).get("relsync/base-version", version),
+        )
+    )
 
 
 def get_current_status_from_parent_chart(chart_path_overrides=None):

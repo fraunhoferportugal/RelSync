@@ -8,7 +8,12 @@ default_values_location = f"{default_chart_dir}/values.yaml"
 
 
 def apply_distribution_updates(
-    updates, parent_info, chart_path_overrides, quiet=False, no_backup=False, prerelease_identifier=None
+    updates,
+    parent_info,
+    chart_path_overrides,
+    quiet=False,
+    no_backup=False,
+    prerelease_identifier=None,
 ):
     repo_chart = chart_path_overrides.get("repo_chart")
     if not os.path.isfile(repo_chart):
@@ -32,10 +37,14 @@ def apply_distribution_updates(
             f"Updating parent chart version: {chart_data.get("version")} -> {parent_info["suggested"]}"
         )
     chart_data["version"] = parent_info["suggested"]
-    if prerelease_identifier and prerelease_identifier in parent_info["suggested"] and prerelease_identifier not in parent_info["current"]:
+    if (
+        prerelease_identifier
+        and prerelease_identifier in parent_info["suggested"]
+        and prerelease_identifier not in parent_info["current"]
+    ):
         annotations = chart_data.get("annotations", {})
         annotations["relsync/base-version"] = parent_info["current"]
-        annotations["relsync/bump"]=parent_info["chart_bump"]
+        annotations["relsync/bump"] = parent_info["chart_bump"]
         chart_data["annotations"] = annotations
 
     dump_yaml(chart_data, repo_chart)
@@ -50,7 +59,9 @@ def parse_chart_path_overrides(
     ) or file_overrides.get("submoduleCharts", {})
 
     repo_chart_path_override = (
-        repo_chart_path_arg if repo_chart_path_arg else file_overrides.get("repoChart", None)
+        repo_chart_path_arg
+        if repo_chart_path_arg
+        else file_overrides.get("repoChart", None)
     )
     return {
         "repo_chart": (

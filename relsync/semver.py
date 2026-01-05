@@ -75,4 +75,6 @@ def bump_version(version, bump):
         return f"{major}.{minor+1}.0"
     elif bump == "patch":
         return f"{major}.{minor}.{patch+1}"
+    elif bump == "release":
+        return f"{major}.{minor}.{patch}"
     return version

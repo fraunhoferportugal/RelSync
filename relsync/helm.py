@@ -132,15 +132,23 @@ def bump_chart_version(bump_type, app_version, update_chart, chart_path_override
     new_chart_version = bump_version(chart_version, bump_type)
     if update_chart:
         values_file = f"{os.path.dirname(chart_file)}/values.yaml"
-        if not os.path.exists(values_file):
+        if os.path.exists(values_file):
+            values = load_yaml(values_file)
+            values["image"]["tag"] = app_version
+            dump_yaml(values, values_file)
+        else:
             print(f"Values file not found: {values_file}", file=sys.stderr)
-            sys.exit(1)
-        values = load_yaml(values_file)
-        values["image"]["tag"] = app_version
-        dump_yaml(values, values_file)
 
         chart["version"] = new_chart_version
         chart["appVersion"] = app_version
+        if chart.get("annotations"):
+            if chart.get("annotations").get("relsync/base-version"):
+                del chart["annotations"]["relsync/base-version"]
+            if chart.get("annotations").get("relsync/bump"):
+                del chart["annotations"]["relsync/bump"]
+            if not len(chart.get("annotations")):
+                del chart["annotations"]
+
         dump_yaml(chart, chart_file)
 
     return new_chart_version

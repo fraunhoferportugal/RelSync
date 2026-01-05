@@ -110,9 +110,7 @@ def fetch_updates(
             parts = prerelease.split(".")
             if len(parts) > 1 and parts[-1].isdigit():
                 prerelease_number = int(parts[-1])
-            repo_suggested = (
-                f"{".".join(str(x) for x in parse_version(repo_current))}-{prerelease_identifier}.{prerelease_number+1}"
-            )
+            repo_suggested = f"{".".join(str(x) for x in parse_version(repo_current))}-{prerelease_identifier}.{prerelease_number+1}"
         else:
             repo_suggested = f"{repo_suggested}-{prerelease_identifier}"
 
@@ -321,7 +319,7 @@ def main():
     tag_parser.add_argument(
         "bump_type",
         help="The bump to apply to the repo",
-        choices=["major", "minor", "patch"],
+        choices=["major", "minor", "patch", "release"],
         default="patch",
     )
     tag_parser.add_argument("-t", "--create-tag", action="store_true")
@@ -334,7 +332,7 @@ def main():
     tag_parser.add_argument(
         "--chart-bump-type",
         help="The bump type to apply to the chart",
-        choices=["major", "minor", "patch"],
+        choices=["major", "minor", "patch", "release"],
         default="patch",
     )
     tag_parser.add_argument(

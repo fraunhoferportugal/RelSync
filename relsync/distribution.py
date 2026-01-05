@@ -35,6 +35,7 @@ def apply_distribution_updates(
     if prerelease_identifier and prerelease_identifier in parent_info["suggested"] and prerelease_identifier not in parent_info["current"]:
         annotations = chart_data.get("annotations", {})
         annotations["relsync/base-version"] = parent_info["current"]
+        annotations["relsync/bump"]=parent_info["chart_bump"]
         chart_data["annotations"] = annotations
 
     dump_yaml(chart_data, repo_chart)

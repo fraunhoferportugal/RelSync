@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional, Union, Tuple
 import re
 
-bump_priority = {"patch": 1, "minor": 2, "major": 3}
+bump_priority = {"release": 0, "patch": 1, "minor": 2, "major": 3}
 
 semver_regex = re.compile(
     r"^(?P<prefix>v?)"

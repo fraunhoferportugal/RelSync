@@ -37,13 +37,10 @@ def apply_distribution_updates(
             f"Updating parent chart version: {chart_data.get("version")} -> {parent_info["suggested"]}"
         )
     chart_data["version"] = parent_info["suggested"]
-    if (
-        prerelease_identifier
-        and prerelease_identifier in parent_info["suggested"]
-        and prerelease_identifier not in parent_info["current"]
-    ):
+    if prerelease_identifier and prerelease_identifier in parent_info["suggested"]:
         annotations = chart_data.get("annotations", {})
-        annotations["relsync/base-version"] = parent_info["current"]
+        if prerelease_identifier not in parent_info["current"]:
+            annotations["relsync/base-version"] = parent_info["current"]
         annotations["relsync/bump"] = parent_info["chart_bump"]
         chart_data["annotations"] = annotations
 

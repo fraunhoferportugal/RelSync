@@ -460,11 +460,6 @@ def main():
                     print("Unknown or missing command")
                     distribution_update_parser.print_help()
         case "bump":
-            if args.create_tag and not args.commit and not args.no_chart:
-                print(
-                    'WARNING: Running with "--create-tag" without "--commit" only prints the versions if the "--no-chart" option is not used.'
-                )
-
             latest_tag = get_latest_tag()
             app_version = get_version_string(latest_tag)
             if not args.skip_repo_bump:
@@ -477,34 +472,39 @@ def main():
                 )
 
             new_tag = None
-            if args.commit and args.create_tag:
-                if not args.no_chart:
-                    if args.skip_repo_bump:
+            if not args.no_chart:
+                if args.skip_repo_bump:
+                    new_tag = f"{app_version}+chart{chart_version}"
+                    if args.commit:
                         message = (
                             args.commit_message
                             if args.commit_message
                             else "Update chart version"
                         )
                         commit_changes(message)
-                        new_tag = f"{app_version}+chart{chart_version}"
-                        run(f"git tag {new_tag}")
-                    else:
+                        if args.create_tag:
+                            run(f"git tag {new_tag}")
+                else:
+                    new_tag = app_version
+                    if args.commit:
                         message = (
                             args.commit_message
                             if args.commit_message
                             else "Update app and chart versions"
                         )
                         commit_changes(message)
-                        new_tag = app_version
-                        run(f"git tag {new_tag}")
+                        if args.create_tag:
+                            run(f"git tag {new_tag}")
             if args.no_chart:
-                message = (
-                    args.commit_message
-                    if args.commit_message
-                    else "Update app versions"
-                )
                 new_tag = app_version
-                run(f"git tag {new_tag}")
+                if args.commit:
+                    message = (
+                        args.commit_message
+                        if args.commit_message
+                        else "Update app versions"
+                    )
+                    if args.create_tag:
+                        run(f"git tag {new_tag}")
 
             match (args.output):
                 case "json":

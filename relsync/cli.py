@@ -17,6 +17,7 @@ def fetch_updates(
     submodule_tag_overrides,
     chart_path_overrides,
     prerelease_identifier=None,
+    exclude_submodules=[],
 ):
     submodules = get_submodules()
     updates = {}
@@ -24,6 +25,8 @@ def fetch_updates(
 
     submodule_chart_path_overrides = chart_path_overrides.get("submodule_charts", {})
     for name, path in submodules.items():
+        if path in exclude_submodules:
+            continue
         tags, current_tag, latest_tag = fetch_tags(path)
 
         suggested_tag = submodule_tag_overrides.get(name, latest_tag)
@@ -271,6 +274,12 @@ def main():
         help="Add a prerelease identifier to the helm chart version. Follows the format <next-version>-<identifier>(.nr-of-the-update)",
         default=None,
     )
+    update_parser.add_argument(
+        "--exclude-submodule",
+        help="Do not look for updates in a submodule with the given path",
+        action="append",
+        default=[],
+    )
 
     format_parser = subparsers.add_parser(
         "format",
@@ -409,6 +418,7 @@ def main():
                     submodule_tag_overrides,
                     chart_path_overrides,
                     prerelease_identifier=args.prerelease_identifier,
+                    exclude_submodules=args.exclude_submodule,
                 )
                 if args.use_state_file:
                     save_state(updates, parent_info, args.state_file)
@@ -423,7 +433,9 @@ def main():
                 prerelease_identifier=args.prerelease_identifier,
             )
             new_updates, new_parent_info = fetch_updates(
-                submodule_tag_overrides, chart_path_overrides
+                submodule_tag_overrides,
+                chart_path_overrides,
+                exclude_submodules=args.exclude_submodule,
             )
             if args.use_state_file:
                 save_state(new_updates, new_parent_info, args.state_file)

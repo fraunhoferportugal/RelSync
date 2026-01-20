@@ -515,8 +515,8 @@ def main():
                         if args.commit_message
                         else "Update app versions"
                     )
-                    if args.create_tag:
-                        run(f"git tag {new_tag}")
+                if args.create_tag:
+                    run(f"git tag {new_tag}")
 
             match (args.output):
                 case "json":

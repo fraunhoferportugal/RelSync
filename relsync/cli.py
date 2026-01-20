@@ -494,8 +494,8 @@ def main():
                             else "Update chart version"
                         )
                         commit_changes(message)
-                        if args.create_tag:
-                            run(f"git tag {new_tag}")
+                    if args.create_tag:
+                        run(f"git tag {new_tag}")
                 else:
                     new_tag = app_version
                     if args.commit:
@@ -505,8 +505,8 @@ def main():
                             else "Update app and chart versions"
                         )
                         commit_changes(message)
-                        if args.create_tag:
-                            run(f"git tag {new_tag}")
+                    if args.create_tag:
+                        run(f"git tag {new_tag}")
             if args.no_chart:
                 new_tag = app_version
                 if args.commit:
